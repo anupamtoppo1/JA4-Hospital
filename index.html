@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JA4 Hospital Ranchi | Patient Management</title>
+    <title>JA4 Hospital Ranchi | Advanced EHR</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -23,7 +23,7 @@
             overflow: hidden;
         }
 
-        /* --- Loading Screen --- */
+        /* --- LOADING SCREEN --- */
         #loadingScreen {
             display: none;
             position: fixed;
@@ -34,33 +34,6 @@
             justify-content: center;
             align-items: center;
         }
-
-        /* --- BIG RESULT BANNER --- */
-        #resultBanner {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .banner-content {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            width: 500px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .banner-icon { font-size: 80px; margin-bottom: 20px; }
-        .banner-title { font-size: 2rem; font-weight: 800; margin-bottom: 10px; }
-        .banner-details { font-size: 1.1rem; color: #475569; margin-bottom: 25px; line-height: 1.6; }
 
         .spinner {
             width: 50px;
@@ -73,35 +46,74 @@
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* --- Sidebar & UI --- */
-        .sidebar { width: 320px; background: white; border-right: 1px solid #e2e8f0; padding: 20px; display: flex; flex-direction: column; gap: 15px; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
-        .brand { color: var(--hosp-blue); font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--hosp-bg); padding-bottom: 15px; }
-        .card { background: #fff; padding: 15px; border-radius: 10px; border: 1px solid #f1f5f9; }
-        h3 { font-size: 0.85rem; margin-bottom: 10px; color: #64748b; text-transform: uppercase; }
-        input, select { width: 100%; padding: 10px; margin: 5px 0 10px 0; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        /* --- BIG RESULT BANNER --- */
+        #resultBanner {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .banner-content {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            width: 520px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .banner-icon { font-size: 90px; margin-bottom: 20px; }
+        .banner-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 10px; }
+        .banner-details { font-size: 1.15rem; color: #475569; margin-bottom: 25px; line-height: 1.8; }
+        
+        .timing-badge {
+            display: inline-block;
+            background: #f1f5f9;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-family: monospace;
+            font-weight: bold;
+            color: var(--hosp-blue);
+            margin-top: 10px;
+        }
+
+        /* --- SIDEBAR & UI --- */
+        .sidebar { width: 330px; background: white; border-right: 1px solid #e2e8f0; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
+        .brand { color: var(--hosp-blue); font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 12px; padding-bottom: 15px; border-bottom: 2px solid var(--hosp-bg); }
+        .card { background: #fff; padding: 18px; border-radius: 12px; border: 1px solid #f1f5f9; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        h3 { font-size: 0.8rem; margin-bottom: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0 12px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-search { background: var(--hosp-blue); color: white; }
         .btn-add { background: var(--success); color: white; }
-        .btn-close { background: #334155; color: white; padding: 10px 30px; margin-top: 10px; }
+        .btn-close { background: #1e293b; color: white; padding: 12px 40px; margin-top: 15px; }
+        button:hover { filter: brightness(90%); }
 
-        /* --- Table Styling --- */
-        .main-content { flex: 1; padding: 25px; display: flex; flex-direction: column; }
-        .table-container { background: white; border-radius: 12px; flex: 1; overflow-y: auto; border: 1px solid #e2e8f0; }
+        /* --- TABLE --- */
+        .main-content { flex: 1; padding: 30px; display: flex; flex-direction: column; }
+        .table-container { background: white; border-radius: 16px; flex: 1; overflow-y: auto; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
         table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafc; text-align: left; padding: 15px; position: sticky; top: 0; color: var(--hosp-blue); font-size: 0.8rem; }
-        td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
-        tr.highlight { background-color: #fef9c3 !important; font-weight: bold; }
+        th { background: #f8fafc; text-align: left; padding: 18px; position: sticky; top: 0; color: var(--hosp-blue); font-size: 0.85rem; z-index: 10; }
+        td { padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+        tr.highlight { background-color: #fef9c3 !important; font-weight: bold; border-left: 5px solid var(--warning); }
 
-        #smallToast { display: none; padding: 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; text-align: center; }
+        #smallToast { display: none; padding: 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; text-align: center; margin-top: 10px; }
         .t-warn { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
     </style>
 </head>
 <body>
 
-<!-- Loading Layer -->
+<!-- Processing Overlay -->
 <div id="loadingScreen">
     <div class="spinner"></div>
-    <h2 id="loadingText" style="margin-top: 20px; color: var(--hosp-blue);">Accessing Records...</h2>
+    <h2 id="loadingText" style="margin-top: 25px; color: var(--hosp-blue);">System Scanning...</h2>
 </div>
 
 <!-- BIG RESULT BANNER -->
@@ -110,10 +122,12 @@
         <div id="bannerIcon" class="banner-icon"></div>
         <div id="bannerTitle" class="banner-title"></div>
         <div id="bannerDetails" class="banner-details"></div>
-        <button class="btn-close" onclick="closeBanner()">CLOSE VIEW</button>
+        <div id="bannerTime" class="timing-badge"></div><br><br>
+        <button class="btn-close" onclick="closeBanner()">DISMISS</button>
     </div>
 </div>
 
+<!-- Sidebar -->
 <div class="sidebar">
     <div class="brand"><i class="fa-solid fa-hospital-user"></i> JA4 RANCHI</div>
 
@@ -121,32 +135,33 @@
         <h3><i class="fa-solid fa-magnifying-glass"></i> Registry Search</h3>
         <input type="number" id="searchID" placeholder="Enter ID (100-999)">
         <select id="searchMethod">
-            <option value="linear">Linear Search (Slow Scan)</option>
-            <option value="binary">Binary Search (Fast Divide)</option>
+            <option value="linear">Linear Search (Scanning All)</option>
+            <option value="binary">Binary Search (Dividing Logic)</option>
         </select>
-        <button class="btn-search" onclick="runSearch()">SEARCH SYSTEM</button>
+        <button class="btn-search" onclick="runSearch()">START SEARCH</button>
     </div>
 
     <div class="card">
-        <h3><i class="fa-solid fa-plus-circle"></i> New Admission</h3>
-        <input type="number" id="newID" placeholder="ID (100-999)">
-        <input type="text" id="newName" placeholder="Patient Full Name">
+        <h3><i class="fa-solid fa-plus-circle"></i> Add New Patient</h3>
+        <input type="number" id="newID" placeholder="Assign ID (100-999)">
+        <input type="text" id="newName" placeholder="Full Name">
         <select id="newDept">
             <option>Cardiology</option>
             <option>Neurology</option>
             <option>Pediatrics</option>
             <option>Orthopedics</option>
         </select>
-        <button class="btn-add" onclick="addNewPatient()">ADD PATIENT</button>
+        <button class="btn-add" onclick="addNewPatient()">ADMIT PATIENT</button>
     </div>
 
     <div id="smallToast"></div>
 </div>
 
+<!-- Main UI -->
 <div class="main-content">
-    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin:0; color: #1e293b;">Central Patient Registry</h2>
-        <div id="pCount" style="background: var(--hosp-blue); color:white; padding: 5px 15px; border-radius: 20px; font-weight: bold;">Records: 0</div>
+    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h2 style="margin:0; color: #1e293b; font-weight: 800;">Central Patient Database</h2>
+        <div id="pCount" style="background: var(--hosp-blue); color:white; padding: 6px 20px; border-radius: 25px; font-weight: bold; font-size: 0.9rem;">Total Records: 100</div>
     </div>
 
     <div class="table-container">
@@ -156,7 +171,7 @@
                     <th>Patient ID</th>
                     <th>Full Name</th>
                     <th>Department</th>
-                    <th>Status</th>
+                    <th>Admission Status</th>
                 </tr>
             </thead>
             <tbody id="registryBody"></tbody>
@@ -177,19 +192,18 @@
     const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin"];
     const depts = ["Cardiology", "Neurology", "Pediatrics", "Orthopedics"];
 
-    // 1. Generate 100 Patients with IDs 100-999
+    // 1. Init 100 Records with Random IDs (100-999)
     function initData() {
         const usedIds = new Set(patients.map(p => p.id));
-        
         while(patients.length < 100) {
-            let randomId = Math.floor(Math.random() * (999 - 100 + 1)) + 100;
+            let randomId = Math.floor(Math.random() * 900) + 100;
             if(!usedIds.has(randomId)) {
                 let name = firstNames[Math.floor(Math.random() * firstNames.length)] + " " + lastNames[Math.floor(Math.random() * lastNames.length)];
                 patients.push({ id: randomId, name, dept: depts[patients.length % 4] });
                 usedIds.add(randomId);
             }
         }
-        patients.sort(() => Math.random() - 0.5); 
+        patients.sort(() => Math.random() - 0.5); // Randomize initially
         updateUI();
     }
 
@@ -199,24 +213,24 @@
         patients.forEach(p => {
             const tr = document.createElement('tr');
             if (p.id == highlightId) tr.className = 'highlight';
-            tr.innerHTML = `<td><b>#${p.id}</b></td><td>${p.name}</td><td>${p.dept}</td><td style="color:var(--success)">● Verified</td>`;
+            tr.innerHTML = `<td><b>#${p.id}</b></td><td>${p.name}</td><td>${p.dept}</td><td><span style="color:var(--success)">● Verified</span></td>`;
             body.appendChild(tr);
         });
-        document.getElementById('pCount').innerText = `Records: ${patients.length}`;
+        document.getElementById('pCount').innerText = `Total Records: ${patients.length}`;
     }
 
-    // 2. Add Patient with Duplicate Check
+    // 2. Add New Patient with Duplicate Checking
     function addNewPatient() {
         const idInput = document.getElementById('newID').value;
         const name = document.getElementById('newName').value;
         const dept = document.getElementById('newDept').value;
         const toast = document.getElementById('smallToast');
 
-        if(!idInput || !name) return alert("Please fill ID and Name");
+        if(!idInput || !name) return alert("Missing ID or Patient Name");
         const id = parseInt(idInput);
 
         if(patients.some(p => p.id === id)) {
-            toast.innerText = "DUPLICATE ID FOUND: #" + id;
+            toast.innerText = "DUPLICATE ENTRY: ID #" + id + " is already registered.";
             toast.className = "t-warn";
             toast.style.display = "block";
             return;
@@ -227,25 +241,30 @@
         updateUI(id);
         document.getElementById('newID').value = '';
         document.getElementById('newName').value = '';
-        setTimeout(() => document.querySelector('.highlight').scrollIntoView({behavior:'smooth', block:'center'}), 100);
+        setTimeout(() => document.querySelector('.highlight').scrollIntoView({behavior:'smooth', block:'center'}), 150);
     }
 
-    // 3. BIG BANNER SEARCH
+    // 3. Search Algorithm Simulation with TIMING
     async function runSearch() {
         const target = parseInt(document.getElementById('searchID').value);
         const method = document.getElementById('searchMethod').value;
-        if(!target) return alert("Enter a Patient ID");
+        if(!target) return alert("Please enter a Patient ID");
 
         document.getElementById('loadingScreen').style.display = 'flex';
-        document.getElementById('loadingText').innerText = method === 'linear' ? "Searching Every Record (Linear Scan)..." : "Dividing Database (Binary Search)...";
+        document.getElementById('loadingText').innerText = method === 'linear' ? "Scanning all files (Linear)..." : "Dividing registry (Binary)...";
 
-        // Simulated algorithmic delay
-        await new Promise(r => setTimeout(r, method === 'linear' ? 3500 : 1200));
+        // Performance Start
+        const tStart = performance.now();
+
+        // Simulated algorithmic complexity delay
+        const delay = method === 'linear' ? 3500 : 1200;
+        await new Promise(r => setTimeout(r, delay));
 
         let index = -1;
         if(method === 'linear') {
             index = patients.findIndex(p => p.id === target);
         } else {
+            // Binary search requires sorted data
             patients.sort((a,b) => a.id - b.id);
             updateUI();
             let low = 0, high = patients.length - 1;
@@ -257,29 +276,36 @@
             }
         }
 
+        // Performance End
+        const tEnd = performance.now();
+        const duration = ((tEnd - tStart) / 1000).toFixed(4);
+
         document.getElementById('loadingScreen').style.display = 'none';
-        showBanner(index, target);
+        showBanner(index, target, duration, method);
     }
 
-    function showBanner(index, id) {
+    function showBanner(index, id, time, method) {
         const banner = document.getElementById('resultBanner');
         const icon = document.getElementById('bannerIcon');
         const title = document.getElementById('bannerTitle');
         const details = document.getElementById('bannerDetails');
+        const timeBox = document.getElementById('bannerTime');
+
+        timeBox.innerHTML = `<i class="fa-regular fa-clock"></i> Search Time: ${time} Seconds (${method.toUpperCase()})`;
 
         if(index !== -1) {
             const p = patients[index];
             icon.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>';
             title.innerText = "PATIENT FOUND";
             title.style.color = "var(--success)";
-            details.innerHTML = `<strong>ID: #${p.id}</strong><br>Name: ${p.name}<br>Dept: ${p.dept}`;
+            details.innerHTML = `<strong>Patient ID: #${p.id}</strong><br>Name: <b>${p.name}</b><br>Department: ${p.dept}`;
             updateUI(p.id);
             setTimeout(() => document.querySelector('.highlight').scrollIntoView({behavior:'smooth', block:'center'}), 200);
         } else {
             icon.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color:var(--danger)"></i>';
-            title.innerText = "NOT FOUND";
+            title.innerText = "RECORDS NOT FOUND";
             title.style.color = "var(--danger)";
-            details.innerText = "The Patient ID #" + id + " does not exist in our central database.";
+            details.innerText = "Access Denied: The Patient ID #" + id + " does not exist in the Ranchi central registry.";
         }
         banner.style.display = 'flex';
     }
