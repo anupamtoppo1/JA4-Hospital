@@ -35,6 +35,33 @@
             align-items: center;
         }
 
+        /* --- BIG RESULT BANNER --- */
+        #resultBanner {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .banner-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .banner-icon { font-size: 80px; margin-bottom: 20px; }
+        .banner-title { font-size: 2rem; font-weight: 800; margin-bottom: 10px; }
+        .banner-details { font-size: 1.1rem; color: #475569; margin-bottom: 25px; line-height: 1.6; }
+
         .spinner {
             width: 50px;
             height: 50px;
@@ -46,98 +73,45 @@
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* --- UI Layout --- */
-        .sidebar {
-            width: 320px;
-            background: white;
-            border-right: 1px solid #e2e8f0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
-        }
-
-        .brand {
-            color: var(--hosp-blue);
-            font-size: 1.3rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 2px solid var(--hosp-bg);
-            padding-bottom: 15px;
-        }
-
-        .card {
-            background: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #f1f5f9;
-        }
-
-        h3 { font-size: 0.85rem; margin: 0 0 10px 0; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0 10px 0;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            box-sizing: border-box;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
+        /* --- Sidebar & UI --- */
+        .sidebar { width: 320px; background: white; border-right: 1px solid #e2e8f0; padding: 20px; display: flex; flex-direction: column; gap: 15px; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
+        .brand { color: var(--hosp-blue); font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--hosp-bg); padding-bottom: 15px; }
+        .card { background: #fff; padding: 15px; border-radius: 10px; border: 1px solid #f1f5f9; }
+        h3 { font-size: 0.85rem; margin-bottom: 10px; color: #64748b; text-transform: uppercase; }
+        input, select { width: 100%; padding: 10px; margin: 5px 0 10px 0; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .btn-search { background: var(--hosp-blue); color: white; }
         .btn-add { background: var(--success); color: white; }
-        button:hover { filter: brightness(90%); }
+        .btn-close { background: #334155; color: white; padding: 10px 30px; margin-top: 10px; }
 
         /* --- Table Styling --- */
         .main-content { flex: 1; padding: 25px; display: flex; flex-direction: column; }
-
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            flex: 1;
-            overflow-y: auto;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-        }
-
+        .table-container { background: white; border-radius: 12px; flex: 1; overflow-y: auto; border: 1px solid #e2e8f0; }
         table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafc; text-align: left; padding: 15px; position: sticky; top: 0; z-index: 10; font-size: 0.8rem; color: var(--hosp-blue); }
+        th { background: #f8fafc; text-align: left; padding: 15px; position: sticky; top: 0; color: var(--hosp-blue); font-size: 0.8rem; }
         td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
-
         tr.highlight { background-color: #fef9c3 !important; font-weight: bold; }
 
-        /* --- Toast Messages --- */
-        #statusToast {
-            display: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-top: 5px;
-        }
-        .msg-success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
-        .msg-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-        .msg-warning { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+        #smallToast { display: none; padding: 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; text-align: center; }
+        .t-warn { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
     </style>
 </head>
 <body>
 
+<!-- Loading Layer -->
 <div id="loadingScreen">
     <div class="spinner"></div>
     <h2 id="loadingText" style="margin-top: 20px; color: var(--hosp-blue);">Accessing Records...</h2>
+</div>
+
+<!-- BIG RESULT BANNER -->
+<div id="resultBanner">
+    <div class="banner-content">
+        <div id="bannerIcon" class="banner-icon"></div>
+        <div id="bannerTitle" class="banner-title"></div>
+        <div id="bannerDetails" class="banner-details"></div>
+        <button class="btn-close" onclick="closeBanner()">CLOSE VIEW</button>
+    </div>
 </div>
 
 <div class="sidebar">
@@ -145,7 +119,7 @@
 
     <div class="card">
         <h3><i class="fa-solid fa-magnifying-glass"></i> Registry Search</h3>
-        <input type="number" id="searchID" placeholder="Enter Patient ID">
+        <input type="number" id="searchID" placeholder="Enter ID (100-999)">
         <select id="searchMethod">
             <option value="linear">Linear Search (Slow Scan)</option>
             <option value="binary">Binary Search (Fast Divide)</option>
@@ -155,7 +129,7 @@
 
     <div class="card">
         <h3><i class="fa-solid fa-plus-circle"></i> New Admission</h3>
-        <input type="number" id="newID" placeholder="ID #">
+        <input type="number" id="newID" placeholder="ID (100-999)">
         <input type="text" id="newName" placeholder="Patient Full Name">
         <select id="newDept">
             <option>Cardiology</option>
@@ -166,12 +140,12 @@
         <button class="btn-add" onclick="addNewPatient()">ADD PATIENT</button>
     </div>
 
-    <div id="statusToast"></div>
+    <div id="smallToast"></div>
 </div>
 
 <div class="main-content">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin:0; color: #1e293b;">Active Patient Database</h2>
+        <h2 style="margin:0; color: #1e293b;">Central Patient Registry</h2>
         <div id="pCount" style="background: var(--hosp-blue); color:white; padding: 5px 15px; border-radius: 20px; font-weight: bold;">Records: 0</div>
     </div>
 
@@ -203,14 +177,19 @@
     const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin"];
     const depts = ["Cardiology", "Neurology", "Pediatrics", "Orthopedics"];
 
-    // 1. Generate up to 100 original-style names
+    // 1. Generate 100 Patients with IDs 100-999
     function initData() {
+        const usedIds = new Set(patients.map(p => p.id));
+        
         while(patients.length < 100) {
-            let id = 400 + patients.length;
-            let name = firstNames[Math.floor(Math.random() * firstNames.length)] + " " + lastNames[Math.floor(Math.random() * lastNames.length)];
-            patients.push({ id, name, dept: depts[patients.length % 4] });
+            let randomId = Math.floor(Math.random() * (999 - 100 + 1)) + 100;
+            if(!usedIds.has(randomId)) {
+                let name = firstNames[Math.floor(Math.random() * firstNames.length)] + " " + lastNames[Math.floor(Math.random() * lastNames.length)];
+                patients.push({ id: randomId, name, dept: depts[patients.length % 4] });
+                usedIds.add(randomId);
+            }
         }
-        patients.sort(() => Math.random() - 0.5); // Start unsorted
+        patients.sort(() => Math.random() - 0.5); 
         updateUI();
     }
 
@@ -220,66 +199,54 @@
         patients.forEach(p => {
             const tr = document.createElement('tr');
             if (p.id == highlightId) tr.className = 'highlight';
-            tr.innerHTML = `<td><b>#${p.id}</b></td><td>${p.name}</td><td>${p.dept}</td><td style="color:var(--success)">● Admitted</td>`;
+            tr.innerHTML = `<td><b>#${p.id}</b></td><td>${p.name}</td><td>${p.dept}</td><td style="color:var(--success)">● Verified</td>`;
             body.appendChild(tr);
         });
         document.getElementById('pCount').innerText = `Records: ${patients.length}`;
     }
 
-    function showStatus(msg, type) {
-        const t = document.getElementById('statusToast');
-        t.innerText = msg;
-        t.className = 'msg-' + type;
-        t.style.display = 'block';
-    }
-
-    // 2. Add Patient with DUPLICATE CHECK
+    // 2. Add Patient with Duplicate Check
     function addNewPatient() {
-        const id = parseInt(document.getElementById('newID').value);
+        const idInput = document.getElementById('newID').value;
         const name = document.getElementById('newName').value;
         const dept = document.getElementById('newDept').value;
+        const toast = document.getElementById('smallToast');
 
-        if(!id || !name) return showStatus("Enter ID and Name", "error");
+        if(!idInput || !name) return alert("Please fill ID and Name");
+        const id = parseInt(idInput);
 
-        // Duplicate Check Logic
-        const exists = patients.some(p => p.id === id);
-        if(exists) {
-            showStatus("Duplicate Entry Found: ID #" + id + " already exists!", "warning");
+        if(patients.some(p => p.id === id)) {
+            toast.innerText = "DUPLICATE ID FOUND: #" + id;
+            toast.className = "t-warn";
+            toast.style.display = "block";
             return;
         }
 
+        toast.style.display = "none";
         patients.push({id, name, dept});
         updateUI(id);
         document.getElementById('newID').value = '';
         document.getElementById('newName').value = '';
-        showStatus("Successfully Admitted " + name, "success");
-        scrollRowIntoView();
+        setTimeout(() => document.querySelector('.highlight').scrollIntoView({behavior:'smooth', block:'center'}), 100);
     }
 
-    // 3. Search Simulation
+    // 3. BIG BANNER SEARCH
     async function runSearch() {
         const target = parseInt(document.getElementById('searchID').value);
         const method = document.getElementById('searchMethod').value;
-        if(!target) return showStatus("Enter a Patient ID", "error");
+        if(!target) return alert("Enter a Patient ID");
 
-        const loader = document.getElementById('loadingScreen');
-        const loadText = document.getElementById('loadingText');
-        loader.style.display = 'flex';
-        document.getElementById('statusToast').style.display = 'none';
+        document.getElementById('loadingScreen').style.display = 'flex';
+        document.getElementById('loadingText').innerText = method === 'linear' ? "Searching Every Record (Linear Scan)..." : "Dividing Database (Binary Search)...";
 
-        // Algorithmic Delay Simulation
-        let delay = method === 'linear' ? 3500 : 1500;
-        loadText.innerText = method === 'linear' ? "Scanning every record (Linear)..." : "Binary Partitioning Active...";
-
-        await new Promise(r => setTimeout(r, delay));
+        // Simulated algorithmic delay
+        await new Promise(r => setTimeout(r, method === 'linear' ? 3500 : 1200));
 
         let index = -1;
-        const t0 = performance.now();
-
         if(method === 'linear') {
             index = patients.findIndex(p => p.id === target);
         } else {
-            patients.sort((a,b) => a.id - b.id); // Must sort for Binary
+            patients.sort((a,b) => a.id - b.id);
             updateUI();
             let low = 0, high = patients.length - 1;
             while(low <= high) {
@@ -290,23 +257,35 @@
             }
         }
 
-        const t1 = performance.now();
-        loader.style.display = 'none';
-
-        if(index !== -1) {
-            updateUI(patients[index].id);
-            showStatus(`Found: ${patients[index].name} (${((t1-t0)/1000).toFixed(4)}s)`, "success");
-            scrollRowIntoView();
-        } else {
-            showStatus("Patient ID #" + target + " not found.", "error");
-        }
+        document.getElementById('loadingScreen').style.display = 'none';
+        showBanner(index, target);
     }
 
-    function scrollRowIntoView() {
-        setTimeout(() => {
-            const el = document.querySelector('.highlight');
-            if(el) el.scrollIntoView({behavior: 'smooth', block: 'center'});
-        }, 100);
+    function showBanner(index, id) {
+        const banner = document.getElementById('resultBanner');
+        const icon = document.getElementById('bannerIcon');
+        const title = document.getElementById('bannerTitle');
+        const details = document.getElementById('bannerDetails');
+
+        if(index !== -1) {
+            const p = patients[index];
+            icon.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>';
+            title.innerText = "PATIENT FOUND";
+            title.style.color = "var(--success)";
+            details.innerHTML = `<strong>ID: #${p.id}</strong><br>Name: ${p.name}<br>Dept: ${p.dept}`;
+            updateUI(p.id);
+            setTimeout(() => document.querySelector('.highlight').scrollIntoView({behavior:'smooth', block:'center'}), 200);
+        } else {
+            icon.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color:var(--danger)"></i>';
+            title.innerText = "NOT FOUND";
+            title.style.color = "var(--danger)";
+            details.innerText = "The Patient ID #" + id + " does not exist in our central database.";
+        }
+        banner.style.display = 'flex';
+    }
+
+    function closeBanner() {
+        document.getElementById('resultBanner').style.display = 'none';
     }
 
     initData();
