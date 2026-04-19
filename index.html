@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JA4 Hospital Ranchi | Advanced Searching</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --hosp-blue: #0369a1;
+            --hosp-bg: #f0f9ff;
+            --hosp-accent: #0ea5e9;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background: var(--hosp-bg);
+            color: #334155;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Loading Overlay --- */
+        #loadingScreen {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #e0f2fe;
+            border-top: 6px solid var(--hosp-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 320px;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.03);
+        }
+
+        .brand {
+            color: var(--hosp-blue);
+            font-size: 1.2rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* --- Cards & Inputs --- */
+        .card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #f1f5f9;
+        }
+
+        h3 { font-size: 0.9rem; margin-top: 0; color: #64748b; text-transform: uppercase; }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-primary { background: var(--hosp-blue); color: white; }
+        .btn-success { background: var(--success); color: white; margin-top: 5px; }
+        button:hover { opacity: 0.8; }
+
+        /* --- Main Table Area --- */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .registry-container {
+            background: white;
+            border-radius: 12px;
+            flex: 1;
+            overflow-y: auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; text-align: left; padding: 15px; position: sticky; top: 0; font-size: 0.8rem; }
+        td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+
+        .highlight { background-color: #fef9c3 !important; font-weight: bold; }
+
+        /* --- Performance Footer --- */
+        .perf-bar {
+            background: var(--hosp-blue);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div id="loadingScreen">
+    <div class="spinner"></div>
+    <h2 id="loadingText">Scanning Database...</h2>
+    <p style="color: #64748b;">Accessing Encrypted Records</p>
+</div>
+
+<!-- Sidebar Controls -->
+<div class="sidebar">
+    <div class="brand"><i class="fa-solid fa-hospital"></i> JA4 Hospital Ranchi </div>
+
+    <!-- Search Tool -->
+    <div class="card">
+        <h3><i class="fa-solid fa-search"></i> Search Patient</h3>
+        <input type="number" id="searchID" placeholder="Enter Patient ID">
+        <select id="searchMethod">
+            <option value="linear">Linear Search (Complexity: O(n))</option>
+            <option value="binary">Binary Search (Complexity: O(log n))</option>
+        </select>
+        <button class="btn-primary" onclick="triggerSearch()">Execute Search</button>
+    </div>
+
+    <!-- Add Tool -->
+    <div class="card">
+        <h3><i class="fa-solid fa-user-plus"></i> New Admission</h3>
+        <input type="number" id="newID" placeholder="Assign ID">
+        <input type="text" id="newName" placeholder="Patient Full Name">
+        <select id="newDept">
+            <option>Cardiology</option>
+            <option>Neurology</option>
+            <option>ER</option>
+            <option>Pediatrics</option>
+        </select>
+        <button class="btn-success" onclick="addNewPatient()">Add to Registry</button>
+    </div>
+
+    <div id="statusToast" style="display:none; padding:10px; border-radius:8px; font-size:0.8rem;"></div>
+</div>
+
+<!-- Main Data Table -->
+<div class="main-content">
+    <div class="table-header">
+        <h2 style="margin:0">Active Patient Registry</h2>
+        <div id="patientCount" style="color: var(--hosp-blue); font-weight: bold;">Records: 100</div>
+    </div>
+
+    <div class="registry-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID #</th>
+                    <th>Patient Name</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="registryBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let patients = [];
+    const depts = ["Cardiology", "Neurology", "ER", "Pediatrics", "Oncology", "Orthopedics"];
+
+    // 1. Generate 100 Initial Patients
+    function initData() {
+        for (let i = 1; i <= 100; i++) {
+            patients.push({
+                id: 100 + i,
+                name: "Patient Name " + (100 + i),
+                dept: depts[i % depts.length]
+            });
+        }
+        // Shuffle to simulate unsorted start
+        patients.sort(() => Math.random() - 0.5);
+        updateUI();
+    }
+
+    function updateUI(highlightId = null) {
+        const body = document.getElementById('registryBody');
+        body.innerHTML = '';
+        patients.forEach(p => {
+            const tr = document.createElement('tr');
+            if (p.id == highlightId) tr.className = 'highlight';
+            tr.innerHTML = `<td><b>#${p.id}</b></td><td>${p.name}</td><td>${p.dept}</td><td><span style="color:green">● Active</span></td>`;
+            body.appendChild(tr);
+        });
+        document.getElementById('patientCount').innerText = `Records: ${patients.length}`;
+    }
+
+    // 2. Add Patient Feature
+    function addNewPatient() {
+        const id = document.getElementById('newID').value;
+        const name = document.getElementById('newName').value;
+        const dept = document.getElementById('newDept').value;
+
+        if(!id || !name) return alert("Fill all fields");
+
+        patients.push({ id: parseInt(id), name, dept });
+        updateUI();
+        document.getElementById('newID').value = '';
+        document.getElementById('newName').value = '';
+        alert("Patient " + name + " admitted successfully!");
+    }
+
+    // 3. Search Logic with Simulated Delays
+    async function triggerSearch() {
+        const idInput = document.getElementById('searchID').value;
+        if (!idInput) return alert("Enter ID");
+        const target = parseInt(idInput);
+        const method = document.getElementById('searchMethod').value;
+        
+        const loader = document.getElementById('loadingScreen');
+        const loadText = document.getElementById('loadingText');
+        const toast = document.getElementById('statusToast');
+
+        loader.style.display = 'flex';
+        toast.style.display = 'none';
+
+        // Simulated Complexity Delay
+        // Linear is O(n) - slow. Binary is O(log n) - fast.
+        let delay = method === 'linear' ? 3500 : 1200; 
+        loadText.innerText = method === 'linear' ? "Scanning every file (Linear Search)..." : "Binary Partitioning (Quick Search)...";
+
+        const t0 = performance.now();
+
+        // Wait for the simulated "Search" time
+        await new Promise(resolve => setTimeout(resolve, delay));
+
+        let index = -1;
+        if (method === 'linear') {
+            index = patients.findIndex(p => p.id === target);
+        } else {
+            // Binary requires sorting first
+            patients.sort((a, b) => a.id - b.id);
+            updateUI();
+            let left = 0, right = patients.length - 1;
+            while (left <= right) {
+                let mid = Math.floor(left + (right - left) / 2);
+                if (patients[mid].id === target) { index = mid; break; }
+                if (patients[mid].id < target) left = mid + 1;
+                else right = mid - 1;
+            }
+        }
+
+        const t1 = performance.now();
+        const realTime = ((t1 - t0) / 1000).toFixed(4);
+
+        loader.style.display = 'none';
+
+        if (index !== -1) {
+            updateUI(patients[index].id);
+            toast.style.display = 'block';
+            toast.style.background = '#dcfce7';
+            toast.style.color = '#166534';
+            toast.innerHTML = `<i class="fa-solid fa-check"></i> Found! Processed in ${realTime}s`;
+            document.querySelector('.highlight').scrollIntoView({behavior:'smooth', block:'center'});
+        } else {
+            toast.style.display = 'block';
+            toast.style.background = '#fee2e2';
+            toast.style.color = '#991b1b';
+            toast.innerHTML = `<i class="fa-solid fa-xmark"></i> Patient Not Found`;
+        }
+    }
+
+    initData();
+</script>
+
+</body>
+</html>
