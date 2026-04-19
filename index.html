@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JA4 Hospital Ranchi | Advanced EHR</title>
+    <title>JA4 Hospital Ranchi | Search Visualizer</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -14,166 +14,121 @@
             --warning: #f59e0b;
         }
 
-        body {
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            margin: 0;
-            background: var(--hosp-bg);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: var(--hosp-bg); display: flex; height: 100vh; overflow: hidden; }
 
-        /* --- LOADING SCREEN --- */
+        /* --- ADVANCED ANIMATED LOADING SCREEN --- */
         #loadingScreen {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             z-index: 9999;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
 
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #e0f2fe;
-            border-top: 5px solid var(--hosp-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .visualizer-container {
+            width: 600px;
+            height: 200px;
+            background: #f8fafc;
+            border-bottom: 2px solid #cbd5e1;
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            padding: 10px;
+            position: relative;
         }
 
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* --- BIG RESULT BANNER --- */
-        #resultBanner {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
+        .bar {
+            flex: 1;
+            background: #cbd5e1;
+            transition: background 0.1s;
         }
 
-        .banner-content {
-            background: white;
-            padding: 40px;
-            border-radius: 24px;
-            text-align: center;
-            width: 520px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .bar.active { background: var(--success) !important; box-shadow: 0 0 10px var(--success); }
+        .bar.discarded { background: #e2e8f0; opacity: 0.3; }
 
-        @keyframes popIn { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .banner-icon { font-size: 90px; margin-bottom: 20px; }
-        .banner-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 10px; }
-        .banner-details { font-size: 1.15rem; color: #475569; margin-bottom: 25px; line-height: 1.8; }
-        
-        .timing-badge {
-            display: inline-block;
-            background: #f1f5f9;
-            padding: 8px 20px;
-            border-radius: 30px;
-            font-family: monospace;
+        .ops-counter {
+            font-size: 1.5rem;
             font-weight: bold;
-            color: var(--hosp-blue);
-            margin-top: 10px;
+            margin-top: 20px;
+            color: #1e293b;
         }
 
-        /* --- SIDEBAR & UI --- */
+        /* --- REST OF UI --- */
+        #resultBanner { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; }
+        .banner-content { background: white; padding: 40px; border-radius: 24px; text-align: center; width: 500px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: pop 0.3s; }
+        @keyframes pop { from { transform: scale(0.8); opacity: 0; } }
+
         .sidebar { width: 330px; background: white; border-right: 1px solid #e2e8f0; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
-        .brand { color: var(--hosp-blue); font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 12px; padding-bottom: 15px; border-bottom: 2px solid var(--hosp-bg); }
         .card { background: #fff; padding: 18px; border-radius: 12px; border: 1px solid #f1f5f9; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        h3 { font-size: 0.8rem; margin-bottom: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-        input, select { width: 100%; padding: 12px; margin: 5px 0 12px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .main-content { flex: 1; padding: 30px; display: flex; flex-direction: column; }
+        .table-container { background: white; border-radius: 16px; flex: 1; overflow-y: auto; border: 1px solid #e2e8f0; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; text-align: left; padding: 15px; position: sticky; top: 0; z-index: 10; font-size: 0.8rem; }
+        td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        tr.highlight { background-color: #fef9c3 !important; font-weight: bold; }
+
+        input, select { width: 100%; padding: 10px; margin: 5px 0 10px 0; border: 1px solid #cbd5e1; border-radius: 6px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-search { background: var(--hosp-blue); color: white; }
         .btn-add { background: var(--success); color: white; }
-        .btn-close { background: #1e293b; color: white; padding: 12px 40px; margin-top: 15px; }
-        button:hover { filter: brightness(90%); }
-
-        /* --- TABLE --- */
-        .main-content { flex: 1; padding: 30px; display: flex; flex-direction: column; }
-        .table-container { background: white; border-radius: 16px; flex: 1; overflow-y: auto; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafc; text-align: left; padding: 18px; position: sticky; top: 0; color: var(--hosp-blue); font-size: 0.85rem; z-index: 10; }
-        td { padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
-        tr.highlight { background-color: #fef9c3 !important; font-weight: bold; border-left: 5px solid var(--warning); }
-
-        #smallToast { display: none; padding: 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; text-align: center; margin-top: 10px; }
-        .t-warn { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
     </style>
 </head>
 <body>
 
-<!-- Processing Overlay -->
+<!-- ANIMATED LOADER -->
 <div id="loadingScreen">
-    <div class="spinner"></div>
-    <h2 id="loadingText" style="margin-top: 25px; color: var(--hosp-blue);">System Scanning...</h2>
+    <h2 id="algoTitle" style="color: var(--hosp-blue);">Initializing Search...</h2>
+    <div class="visualizer-container" id="visualizer">
+        <!-- Bars generated by JS -->
+    </div>
+    <div class="ops-counter" id="opsCount">Operations: 0</div>
 </div>
 
 <!-- BIG RESULT BANNER -->
 <div id="resultBanner">
     <div class="banner-content">
-        <div id="bannerIcon" class="banner-icon"></div>
-        <div id="bannerTitle" class="banner-title"></div>
-        <div id="bannerDetails" class="banner-details"></div>
-        <div id="bannerTime" class="timing-badge"></div><br><br>
-        <button class="btn-close" onclick="closeBanner()">DISMISS</button>
+        <div id="bannerIcon" style="font-size: 70px; margin-bottom: 15px;"></div>
+        <div id="bannerTitle" style="font-size: 2rem; font-weight: 800; margin-bottom: 10px;"></div>
+        <div id="bannerDetails" style="font-size: 1.1rem; color: #64748b; margin-bottom: 20px;"></div>
+        <div id="bannerTime" style="font-weight: bold; color: var(--hosp-blue); background: #f1f5f9; padding: 10px; border-radius: 8px;"></div><br>
+        <button onclick="closeBanner()" style="background: #1e293b; color: white; width: 200px;">DISMISS</button>
     </div>
 </div>
 
-<!-- Sidebar -->
 <div class="sidebar">
-    <div class="brand"><i class="fa-solid fa-hospital-user"></i> JA4 HOSPITAL RANCHI</div>
-
+    <h2 style="color:var(--hosp-blue); margin: 0 0 20px 0;"><i class="fa-solid fa-hospital"></i> JA4 RANCHI</h2>
+    
     <div class="card">
-        <h3><i class="fa-solid fa-magnifying-glass"></i> Registry Search</h3>
-        <input type="number" id="searchID" placeholder="Enter ID (100-999)">
+        <h3><i class="fa-solid fa-search"></i> Search Patient</h3>
+        <input type="number" id="searchID" placeholder="ID (100-999)">
         <select id="searchMethod">
-            <option value="linear">Linear Search (Scanning All)</option>
-            <option value="binary">Binary Search (Dividing Logic)</option>
+            <option value="linear">Linear Search (Step-by-Step)</option>
+            <option value="binary">Binary Search (Divide & Conquer)</option>
         </select>
-        <button class="btn-search" onclick="runSearch()">START SEARCH</button>
+        <button class="btn-search" onclick="runSearch()">START SCAN</button>
     </div>
 
     <div class="card">
-        <h3><i class="fa-solid fa-plus-circle"></i> Add New Patient</h3>
-        <input type="number" id="newID" placeholder="Assign ID (100-999)">
-        <input type="text" id="newName" placeholder="Full Name">
-        <select id="newDept">
-            <option>Cardiology</option>
-            <option>Neurology</option>
-            <option>Pediatrics</option>
-            <option>Orthopedics</option>
-        </select>
-        <button class="btn-add" onclick="addNewPatient()">ADMIT PATIENT</button>
+        <h3><i class="fa-solid fa-plus-circle"></i> New Admission</h3>
+        <input type="number" id="newID" placeholder="ID (100-999)">
+        <input type="text" id="newName" placeholder="Patient Name">
+        <select id="newDept"><option>Cardiology</option><option>Neurology</option><option>ER</option></select>
+        <button class="btn-add" onclick="addNewPatient()">ADMIT</button>
     </div>
-
-    <div id="smallToast"></div>
+    <div id="smallToast" style="display:none; padding:10px; border-radius:8px; font-size:0.8rem; background:#fef3c7; color:#92400e; margin-top:10px;"></div>
 </div>
 
-<!-- Main UI -->
 <div class="main-content">
-    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-        <h2 style="margin:0; color: #1e293b; font-weight: 800;">Central Patient Database</h2>
-        <div id="pCount" style="background: var(--hosp-blue); color:white; padding: 6px 20px; border-radius: 25px; font-weight: bold; font-size: 0.9rem;">Total Records: 100</div>
+    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin:0;">Ranchi Central Registry</h2>
+        <div id="pCount" style="background: var(--hosp-blue); color:white; padding: 5px 15px; border-radius: 20px;">Records: 100</div>
     </div>
-
     <div class="table-container">
         <table>
-            <thead>
-                <tr>
-                    <th>Patient ID</th>
-                    <th>Full Name</th>
-                    <th>Department</th>
-                    <th>Admission Status</th>
-                </tr>
-            </thead>
+            <thead><tr><th>ID</th><th>Name</th><th>Department</th><th>Status</th></tr></thead>
             <tbody id="registryBody"></tbody>
         </table>
     </div>
@@ -187,23 +142,19 @@
         {id: 307, name: "David Lee", dept: "Orthopedics"},
         {id: 150, name: "Eve Martin", dept: "Cardiology"}
     ];
+    const depts = ["Cardiology", "Neurology", "ER", "Pediatrics"];
+    const firstNames = ["James", "Mary", "Robert", "Patricia", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara"];
+    const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis"];
 
-    const firstNames = ["James", "Mary", "Robert", "Patricia", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen", "Christopher", "Nancy"];
-    const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin"];
-    const depts = ["Cardiology", "Neurology", "Pediatrics", "Orthopedics"];
-
-    // 1. Init 100 Records with Random IDs (100-999)
     function initData() {
-        const usedIds = new Set(patients.map(p => p.id));
         while(patients.length < 100) {
-            let randomId = Math.floor(Math.random() * 900) + 100;
-            if(!usedIds.has(randomId)) {
-                let name = firstNames[Math.floor(Math.random() * firstNames.length)] + " " + lastNames[Math.floor(Math.random() * lastNames.length)];
-                patients.push({ id: randomId, name, dept: depts[patients.length % 4] });
-                usedIds.add(randomId);
+            let id = Math.floor(Math.random() * 900) + 100;
+            if(!patients.find(p => p.id === id)) {
+                let name = firstNames[Math.floor(Math.random() * 10)] + " " + lastNames[Math.floor(Math.random() * 8)];
+                patients.push({ id, name, dept: depts[patients.length % 4] });
             }
         }
-        patients.sort(() => Math.random() - 0.5); // Randomize initially
+        patients.sort(() => Math.random() - 0.5);
         updateUI();
     }
 
@@ -213,106 +164,133 @@
         patients.forEach(p => {
             const tr = document.createElement('tr');
             if (p.id == highlightId) tr.className = 'highlight';
-            tr.innerHTML = `<td><b>#${p.id}</b></td><td>${p.name}</td><td>${p.dept}</td><td><span style="color:var(--success)">● Verified</span></td>`;
+            tr.innerHTML = `<td><b>#${p.id}</b></td><td>${p.name}</td><td>${p.dept}</td><td style="color:var(--success)">● Active</td>`;
             body.appendChild(tr);
         });
-        document.getElementById('pCount').innerText = `Total Records: ${patients.length}`;
+        document.getElementById('pCount').innerText = `Records: ${patients.length}`;
     }
 
-    // 2. Add New Patient with Duplicate Checking
     function addNewPatient() {
-        const idInput = document.getElementById('newID').value;
+        const id = parseInt(document.getElementById('newID').value);
         const name = document.getElementById('newName').value;
-        const dept = document.getElementById('newDept').value;
-        const toast = document.getElementById('smallToast');
-
-        if(!idInput || !name) return alert("Missing ID or Patient Name");
-        const id = parseInt(idInput);
-
+        if(!id || !name) return alert("Enter Data");
         if(patients.some(p => p.id === id)) {
-            toast.innerText = "DUPLICATE ENTRY: ID #" + id + " is already registered.";
-            toast.className = "t-warn";
+            const toast = document.getElementById('smallToast');
+            toast.innerText = "DUPLICATE ID #" + id + " FOUND!";
             toast.style.display = "block";
             return;
         }
-
-        toast.style.display = "none";
-        patients.push({id, name, dept});
+        document.getElementById('smallToast').style.display = "none";
+        patients.push({id, name, dept: document.getElementById('newDept').value});
         updateUI(id);
-        document.getElementById('newID').value = '';
-        document.getElementById('newName').value = '';
-        setTimeout(() => document.querySelector('.highlight').scrollIntoView({behavior:'smooth', block:'center'}), 150);
+        document.querySelector('.highlight').scrollIntoView({behavior:'smooth', block:'center'});
     }
 
-    // 3. Search Algorithm Simulation with TIMING
+    // --- ANIMATION LOGIC ---
     async function runSearch() {
-        const target = parseInt(document.getElementById('searchID').value);
+        const targetID = parseInt(document.getElementById('searchID').value);
         const method = document.getElementById('searchMethod').value;
-        if(!target) return alert("Please enter a Patient ID");
+        if(!targetID) return alert("Enter ID");
 
-        document.getElementById('loadingScreen').style.display = 'flex';
-        document.getElementById('loadingText').innerText = method === 'linear' ? "Scanning all files (Linear)..." : "Dividing registry (Binary)...";
+        const loader = document.getElementById('loadingScreen');
+        const visualizer = document.getElementById('visualizer');
+        const opsText = document.getElementById('opsCount');
+        const title = document.getElementById('algoTitle');
+        
+        loader.style.display = 'flex';
+        visualizer.innerHTML = '';
+        
+        // Generate the "Wedge" bars like in your image
+        const barCount = patients.length;
+        for(let i=0; i<barCount; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.height = ( (i + 5) / barCount * 100 ) + '%'; 
+            visualizer.appendChild(bar);
+        }
+        const bars = document.querySelectorAll('.bar');
 
-        // Performance Start
-        const tStart = performance.now();
+        let foundIndex = -1;
+        let operations = 0;
+        const startTime = performance.now();
 
-        // Simulated algorithmic complexity delay
-        const delay = method === 'linear' ? 3500 : 1200;
-        await new Promise(r => setTimeout(r, delay));
-
-        let index = -1;
-        if(method === 'linear') {
-            index = patients.findIndex(p => p.id === target);
+        if (method === 'linear') {
+            title.innerText = "LINEAR SEARCH: SCANNING REGISTRY...";
+            for (let i = 0; i < patients.length; i++) {
+                operations++;
+                opsText.innerText = "Operations: " + operations;
+                bars[i].classList.add('active');
+                await new Promise(r => setTimeout(r, 40)); // Animation Speed
+                
+                if (patients[i].id === targetID) {
+                    foundIndex = i;
+                    break;
+                }
+                bars[i].classList.remove('active');
+                bars[i].classList.add('discarded');
+            }
         } else {
-            // Binary search requires sorted data
-            patients.sort((a,b) => a.id - b.id);
+            title.innerText = "BINARY SEARCH: DIVIDING DATA...";
+            patients.sort((a, b) => a.id - b.id);
             updateUI();
             let low = 0, high = patients.length - 1;
-            while(low <= high) {
+            while (low <= high) {
+                operations++;
+                opsText.innerText = "Operations: " + operations;
                 let mid = Math.floor((low + high) / 2);
-                if(patients[mid].id === target) { index = mid; break; }
-                if(patients[mid].id < target) low = mid + 1;
-                else high = mid - 1;
+                
+                bars[mid].classList.add('active');
+                await new Promise(r => setTimeout(r, 600)); // Slower jumps to see logic
+
+                if (patients[mid].id === targetID) {
+                    foundIndex = mid;
+                    break;
+                }
+
+                // Discard visually
+                if (patients[mid].id < targetID) {
+                    for(let k=low; k<=mid; k++) bars[k].classList.add('discarded');
+                    low = mid + 1;
+                } else {
+                    for(let k=mid; k<=high; k++) bars[k].classList.add('discarded');
+                    high = mid - 1;
+                }
+                bars[mid].classList.remove('active');
             }
         }
 
-        // Performance End
-        const tEnd = performance.now();
-        const duration = ((tEnd - tStart) / 1000).toFixed(4);
-
-        document.getElementById('loadingScreen').style.display = 'none';
-        showBanner(index, target, duration, method);
+        const endTime = performance.now();
+        loader.style.display = 'none';
+        showFinalBanner(foundIndex, targetID, ((endTime - startTime)/1000).toFixed(4), method, operations);
     }
 
-    function showBanner(index, id, time, method) {
+    function showFinalBanner(idx, id, time, method, ops) {
         const banner = document.getElementById('resultBanner');
         const icon = document.getElementById('bannerIcon');
         const title = document.getElementById('bannerTitle');
         const details = document.getElementById('bannerDetails');
         const timeBox = document.getElementById('bannerTime');
 
-        timeBox.innerHTML = `<i class="fa-regular fa-clock"></i> Search Time: ${time} Seconds (${method.toUpperCase()})`;
+        timeBox.innerText = `Search Completed: ${time}s | Algorithm: ${method.toUpperCase()} | Steps: ${ops}`;
 
-        if(index !== -1) {
-            const p = patients[index];
-            icon.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>';
-            title.innerText = "PATIENT FOUND";
+        if(idx !== -1) {
+            const p = patients[idx];
+            icon.innerHTML = '<i class="fa-solid fa-check-circle" style="color:var(--success)"></i>';
+            title.innerText = "PATIENT LOCATED";
             title.style.color = "var(--success)";
-            details.innerHTML = `<strong>Patient ID: #${p.id}</strong><br>Name: <b>${p.name}</b><br>Department: ${p.dept}`;
+            details.innerHTML = `ID: #${p.id}<br>Name: <b>${p.name}</b><br>Dept: ${p.dept}`;
             updateUI(p.id);
-            setTimeout(() => document.querySelector('.highlight').scrollIntoView({behavior:'smooth', block:'center'}), 200);
+            document.querySelector('.highlight').scrollIntoView({behavior:'smooth', block:'center'});
         } else {
-            icon.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color:var(--danger)"></i>';
-            title.innerText = "RECORDS NOT FOUND";
+            icon.innerHTML = '<i class="fa-solid fa-times-circle" style="color:var(--danger)"></i>';
+            title.innerText = "NOT FOUND";
             title.style.color = "var(--danger)";
-            details.innerText = "The Patient ID #" + id + " does not exist in the Ranchi central registry.";
+            details.innerText = "Patient ID #" + id + " does not exist in our central Ranchi records.";
         }
         banner.style.display = 'flex';
     }
 
-    function closeBanner() {
-        document.getElementById('resultBanner').style.display = 'none';
-    }
+    function closeBanner() { document.getElementById('resultBanner').style.display = 'none'; }
 
     initData();
 </script>
