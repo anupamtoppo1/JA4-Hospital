@@ -12,6 +12,7 @@
             --hosp-accent: #0ea5e9;
             --success: #10b981;
             --danger: #ef4444;
+            --warning: #f59e0b;
         }
 
         body {
@@ -131,15 +132,21 @@
 
         .highlight { background-color: #fef9c3 !important; font-weight: bold; }
 
-        /* --- Performance Footer --- */
-        .perf-bar {
-            background: var(--hosp-blue);
-            color: white;
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
+        /* --- Status Toast Styles --- */
+        #statusToast {
+            display: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 10px;
+            border: 1px solid transparent;
         }
+
+        .toast-success { background: #dcfce7; color: #166534; border-color: #86efac; }
+        .toast-error { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+        .toast-warning { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+
     </style>
 </head>
 <body>
@@ -148,20 +155,20 @@
 <div id="loadingScreen">
     <div class="spinner"></div>
     <h2 id="loadingText">Scanning Database...</h2>
-    <p style="color: #64748b;">Accessing Encrypted Records</p>
+    <p style="color: #64748b;">JA4 Ranchi Security Layer Active</p>
 </div>
 
 <!-- Sidebar Controls -->
 <div class="sidebar">
-    <div class="brand"><i class="fa-solid fa-hospital"></i> JA4 Hospital Ranchi </div>
+    <div class="brand"><i class="fa-solid fa-hospital-user"></i> JA4 HOSPITAL</div>
 
     <!-- Search Tool -->
     <div class="card">
         <h3><i class="fa-solid fa-search"></i> Search Patient</h3>
         <input type="number" id="searchID" placeholder="Enter Patient ID">
         <select id="searchMethod">
-            <option value="linear">Linear Search (Complexity: O(n))</option>
-            <option value="binary">Binary Search (Complexity: O(log n))</option>
+            <option value="linear">Linear Search (O(n))</option>
+            <option value="binary">Binary Search (O(log n))</option>
         </select>
         <button class="btn-primary" onclick="triggerSearch()">Execute Search</button>
     </div>
@@ -180,14 +187,15 @@
         <button class="btn-success" onclick="addNewPatient()">Add to Registry</button>
     </div>
 
-    <div id="statusToast" style="display:none; padding:10px; border-radius:8px; font-size:0.8rem;"></div>
+    <!-- Status Messages -->
+    <div id="statusToast"></div>
 </div>
 
 <!-- Main Data Table -->
 <div class="main-content">
     <div class="table-header">
-        <h2 style="margin:0">Active Patient Registry</h2>
-        <div id="patientCount" style="color: var(--hosp-blue); font-weight: bold;">Records: 100</div>
+        <h2 style="margin:0">Active Patient Registry <small style="font-weight:normal; font-size: 0.9rem; color:#64748b;">(Ranchi Branch)</small></h2>
+        <div id="patientCount" style="color: var(--hosp-blue); font-weight: bold; background: #e0f2fe; padding: 5px 15px; border-radius: 20px;">Records: 100</div>
     </div>
 
     <div class="registry-container">
@@ -197,7 +205,7 @@
                     <th>ID #</th>
                     <th>Patient Name</th>
                     <th>Department</th>
-                    <th>Status</th>
+                    <th>Admission Status</th>
                 </tr>
             </thead>
             <tbody id="registryBody"></tbody>
@@ -209,17 +217,16 @@
     let patients = [];
     const depts = ["Cardiology", "Neurology", "ER", "Pediatrics", "Oncology", "Orthopedics"];
 
-    // 1. Generate 100 Initial Patients
+    // 1. Initial Data Generation
     function initData() {
         for (let i = 1; i <= 100; i++) {
             patients.push({
                 id: 100 + i,
-                name: "Patient Name " + (100 + i),
+                name: "Patient " + (100 + i),
                 dept: depts[i % depts.length]
             });
         }
-        // Shuffle to simulate unsorted start
-        patients.sort(() => Math.random() - 0.5);
+        patients.sort(() => Math.random() - 0.5); // Randomize initial order
         updateUI();
     }
 
@@ -229,56 +236,82 @@
         patients.forEach(p => {
             const tr = document.createElement('tr');
             if (p.id == highlightId) tr.className = 'highlight';
-            tr.innerHTML = `<td><b>#${p.id}</b></td><td>${p.name}</td><td>${p.dept}</td><td><span style="color:green">● Active</span></td>`;
+            tr.innerHTML = `<td><b>#${p.id}</b></td><td>${p.name}</td><td>${p.dept}</td><td><span style="color:var(--success)">● Verified</span></td>`;
             body.appendChild(tr);
         });
         document.getElementById('patientCount').innerText = `Records: ${patients.length}`;
     }
 
-    // 2. Add Patient Feature
+    function showStatus(msg, type) {
+        const toast = document.getElementById('statusToast');
+        toast.innerText = msg;
+        toast.className = ''; 
+        toast.classList.add('toast-' + type);
+        toast.style.display = 'block';
+    }
+
+    // 2. Add Patient Feature with DUPLICATE CHECK
     function addNewPatient() {
-        const id = document.getElementById('newID').value;
+        const idValue = document.getElementById('newID').value;
         const name = document.getElementById('newName').value;
         const dept = document.getElementById('newDept').value;
 
-        if(!id || !name) return alert("Fill all fields");
+        if(!idValue || !name) {
+            showStatus("Error: All fields required", "error");
+            return;
+        }
 
-        patients.push({ id: parseInt(id), name, dept });
-        updateUI();
+        const id = parseInt(idValue);
+
+        // --- DUPLICATE ENTRY LOGIC ---
+        const isDuplicate = patients.some(p => p.id === id);
+
+        if (isDuplicate) {
+            showStatus("Duplicate Entry Found: ID #" + id + " already exists!", "warning");
+            return; 
+        }
+
+        // If not duplicate, add to list
+        patients.push({ id: id, name: name, dept: dept });
+        updateUI(id); // Show and highlight new entry
+        
+        // Reset fields
         document.getElementById('newID').value = '';
         document.getElementById('newName').value = '';
-        alert("Patient " + name + " admitted successfully!");
+        showStatus("Success: Patient " + name + " added.", "success");
+        
+        // Scroll to new entry
+        setTimeout(() => {
+            document.querySelector('.highlight').scrollIntoView({behavior:'smooth', block:'center'});
+        }, 100);
     }
 
     // 3. Search Logic with Simulated Delays
     async function triggerSearch() {
         const idInput = document.getElementById('searchID').value;
-        if (!idInput) return alert("Enter ID");
+        if (!idInput) return showStatus("Error: Please enter ID to search", "error");
+        
         const target = parseInt(idInput);
         const method = document.getElementById('searchMethod').value;
         
         const loader = document.getElementById('loadingScreen');
         const loadText = document.getElementById('loadingText');
-        const toast = document.getElementById('statusToast');
 
         loader.style.display = 'flex';
-        toast.style.display = 'none';
+        document.getElementById('statusToast').style.display = 'none';
 
-        // Simulated Complexity Delay
-        // Linear is O(n) - slow. Binary is O(log n) - fast.
+        // Simulated Complexity Delay: Linear is O(n), Binary is O(log n)
         let delay = method === 'linear' ? 3500 : 1200; 
-        loadText.innerText = method === 'linear' ? "Scanning every file (Linear Search)..." : "Binary Partitioning (Quick Search)...";
+        loadText.innerText = method === 'linear' ? "Scanning every record (Linear)..." : "Binary Partitioning Active...";
 
         const t0 = performance.now();
-
-        // Wait for the simulated "Search" time
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise(resolve => setTimeout(resolve, delay)); // Artificial wait
 
         let index = -1;
         if (method === 'linear') {
             index = patients.findIndex(p => p.id === target);
         } else {
-            // Binary requires sorting first
+            // Binary Search requires sorting
             patients.sort((a, b) => a.id - b.id);
             updateUI();
             let left = 0, right = patients.length - 1;
@@ -291,22 +324,14 @@
         }
 
         const t1 = performance.now();
-        const realTime = ((t1 - t0) / 1000).toFixed(4);
-
         loader.style.display = 'none';
 
         if (index !== -1) {
             updateUI(patients[index].id);
-            toast.style.display = 'block';
-            toast.style.background = '#dcfce7';
-            toast.style.color = '#166534';
-            toast.innerHTML = `<i class="fa-solid fa-check"></i> Found! Processed in ${realTime}s`;
+            showStatus(`Found! Processed in ${((t1 - t0) / 1000).toFixed(4)}s`, "success");
             document.querySelector('.highlight').scrollIntoView({behavior:'smooth', block:'center'});
         } else {
-            toast.style.display = 'block';
-            toast.style.background = '#fee2e2';
-            toast.style.color = '#991b1b';
-            toast.innerHTML = `<i class="fa-solid fa-xmark"></i> Patient Not Found`;
+            showStatus("ID #" + target + " Not Found in Database", "error");
         }
     }
 
