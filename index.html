@@ -276,7 +276,7 @@
         if(idx !== -1) {
             const p = patients[idx];
             icon.innerHTML = '<i class="fa-solid fa-check-circle" style="color:var(--success)"></i>';
-            title.innerText = "PATIENT LOCATED";
+            title.innerText = "PATIENT FOUND";
             title.style.color = "var(--success)";
             details.innerHTML = `ID: #${p.id}<br>Name: <b>${p.name}</b><br>Dept: ${p.dept}`;
             updateUI(p.id);
