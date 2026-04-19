@@ -220,7 +220,7 @@
                 operations++;
                 opsText.innerText = "Operations: " + operations;
                 bars[i].classList.add('active');
-                await new Promise(r => setTimeout(r, 40)); // Animation Speed
+                await new Promise(r => setTimeout(r, 200)); // Animation Speed
                 
                 if (patients[i].id === targetID) {
                     foundIndex = i;
@@ -240,7 +240,7 @@
                 let mid = Math.floor((low + high) / 2);
                 
                 bars[mid].classList.add('active');
-                await new Promise(r => setTimeout(r, 600)); // Slower jumps to see logic
+                await new Promise(r => setTimeout(r, 1000)); // Slower jumps to see logic
 
                 if (patients[mid].id === targetID) {
                     foundIndex = mid;
